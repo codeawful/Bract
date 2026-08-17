@@ -1,0 +1,29 @@
+name: Finish Bract migration
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  copy-binary:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy exact binary asset and remove temporary workflow
+        run: |
+          set -euo pipefail
+          mkdir -p tools/BRACT_Field_Lab/examples
+          curl -L --fail --silent --show-error \
+            https://raw.githubusercontent.com/codeawful/Brume/main/tools/BRACT_Field_Lab/examples/core-smoke-B.png \
+            -o tools/BRACT_Field_Lab/examples/core-smoke-B.png
+          test "$(git hash-object tools/BRACT_Field_Lab/examples/core-smoke-B.png)" = "a4a9abfd1d594dc9ffaad61678d096b7204a5e6e"
+          git rm .github/workflows/finish-migration.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/BRACT_Field_Lab/examples/core-smoke-B.png
+          git commit -m "Complete Bract migration"
+          git push
